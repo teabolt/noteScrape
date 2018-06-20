@@ -4,9 +4,37 @@
 
 # Third party
 
-from selenium import webdriver
-import bs4
+from selenium import webdriver # automatic browser
+import requests # http downloads
+import bs4 # html parsing
 
+# Educational platform: 'loop.dcu.ie'
+
+def log_in():
+    """Logs onto the educational website.
+    Pass auth
+    Form"""
+    # https://stackoverflow.com/questions/11892729/how-to-log-in-to-a-website-using-pythons-requests-module
+    # http://kazuar.github.io/scraping-tutorial/
+    # use Wireshark to test?
+
+    auth_url = 'https://loop.dcu.ie/auth/shibboleth/'
+    top_url = 'https://loop.dcu.ie'
+    payload = {
+    'j_username':'',
+    'j_password':''
+    }
+    s = requests.Session()
+    p = s.post(r.url, data=payload)
+
+
+def navigate():
+    """Returns a list of all the links to notes/resources"""
+    pass
+
+def save_notes():
+    """Saves a piece of notes"""
+    pass
 
 def main():
     # selenium solution
