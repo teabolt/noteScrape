@@ -30,7 +30,21 @@ def log_in():
 
 def navigate():
     """Returns a list of all the links to notes/resources"""
-    pass
+    # Home page
+    modules_box = soup.select('.mymodules_list.mymodules')[0]
+    modules = modules_box.select("div[id^='course-']")
+    links = [module.select(".course_title a[href^='https://loop.dcu.ie']")[0]['href'] for module in modules]
+    # need find(), not select() (returns a list/all elements found)
+
+    # Inside every link
+
+    # Inside every link of link
+
+    # recursion needed, not iteration?
+    # find all resources on page, eg: .pdf links
+    # go to all links and repeat recursively
+    # stop when there's no longer any links
+    # application to find all the links on a page?
 
 def save_notes():
     """Saves a piece of notes"""
