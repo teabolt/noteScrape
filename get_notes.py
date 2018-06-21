@@ -8,25 +8,56 @@ from selenium import webdriver # automatic browser
 import requests # http downloads
 import bs4 # html parsing
 
-# Educational platform: 'loop.dcu.ie'
+# Particular educational platform for now: 'loop.dcu.ie'
 
-def log_in():
-    """Logs onto the educational website.
-    Pass auth
-    Form"""
-    # https://stackoverflow.com/questions/11892729/how-to-log-in-to-a-website-using-pythons-requests-module
-    # http://kazuar.github.io/scraping-tutorial/
-    # use Wireshark to test?
+def log_in(url, method='selenium'):
+    """Logs onto the educational website. 
+    'url' is of the website's very first login page.
+    'method' is either 'selenium' or 'requests'.
+    Returns an object to be used after the logging-in to interact with the website.
+    """
 
-    auth_url = 'https://loop.dcu.ie/auth/shibboleth/'
-    top_url = 'https://loop.dcu.ie'
-    payload = {
-    'j_username':'',
-    'j_password':''
-    }
-    s = requests.Session()
-    p = s.post(r.url, data=payload)
+    # selenium solution
+    if method == 'selenium':
+        # use a simulated browser, click required buttons and fill out required forms (can actually see the browser)
+        browser = webdriver.Firefox(executable_path='geckodriver') # requires geckodriver.exe to be in same directory
+        browser.get(url)
+        # redirect to student login
+        dcu_login = browser.find_element_by_css_selector('.btn.btn-success.btn-large')
+        dcu_login.click() 
 
+        # form login
+        # ****to be made secure****
+        username_form = browser.find_element_by_id('username')
+        username = input('Your username: ')      
+        username_form.send_keys(username)
+        password_form = browser.find_element_by_id('password')
+        password = input('Your password: ')
+        password_form.send_keys(password)
+        submit_button = browser.find_element_by_css_selector('.form-element.form-button')
+        submit_button.click()
+
+        return browser # use this after logging in
+
+    # requests solution
+    if method == 'requests':
+        # problematic
+        # keywords: auth, authentification, form, http, encryption, tcp/ip, ssl, certificate, session
+        # https://stackoverflow.com/questions/11892729/how-to-log-in-to-a-website-using-pythons-requests-module
+        # http://kazuar.github.io/scraping-tutorial/
+        # use Wireshark to monitor http?
+
+        auth_url = 'https://loop.dcu.ie/auth/shibboleth/'
+        top_url = 'https://loop.dcu.ie'
+        payload = {
+        'j_username':'',
+        'j_password':''
+        }
+        s = requests.Session()
+        p = s.post(r.url, data=payload)
+
+def all_links():
+    """Given a page url, returns a list of all the links on the page"""
 
 def navigate():
     """Returns a list of all the links to notes/resources"""
@@ -46,28 +77,22 @@ def navigate():
     # stop when there's no longer any links
     # application to find all the links on a page?
 
-def save_notes():
+def save_notes(url, method='selenium', interactor):
     """Saves a piece of notes"""
-    pass
+    # To-do: build a hirearchical filename
+    filename = './test-file'
+
+    if method == 'selenium':
+        # save the page source
+        interactor = browser
+        url = browser.current_url
+        with open(filename, 'wb') as notes_out:
+            notes_out.write(bytes(browser.page_source, encoding='utf-8')) # need to find in meta[charset]
+
+        # does not work for pdf's -> get a blank page with 3 buttons - thumbnails, doc. outline, attachments
+        # thumbnails links to original url
 
 def main():
-    # selenium solution
-
-    browser = webdriver.Firefox(executable_path=r'geckodriver') # requires geckodriver.exe to be in directory
-    browser.get('https://loop.dcu.ie')
-    dcu_login = browser.find_element_by_css_selector('.btn.btn-success.btn-large')
-    dcu_login.click() # redirect
-
-    # need security here
-    username_form = browser.find_element_by_id('username')
-    username = ''
-    username_form.send_keys(username)
-    password_form = browser.find_element_by_id('password')
-    password = ''
-    password_form.send_keys(password)
-
-    submit_button = browser.find_element_by_css_selector('.form-element.form-button')
-    submit_button.click()
 
     course_element = browser.find_element_by_id('course-9747')
     # course_link = browser.find_element_by_id('yui_3_17_2_2_1529139101852_1015')
