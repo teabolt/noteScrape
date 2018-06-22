@@ -56,8 +56,18 @@ def log_in(url, method='selenium'):
         s = requests.Session()
         p = s.post(r.url, data=payload)
 
-def all_links():
-    """Given a page url, returns a list of all the links on the page"""
+def all_links(soup):
+    """Given a page source (url?), returns a list of all the links on the page"""
+    link_tags = soup.find_all(name='a')
+    links = []
+    for link in link_tags:
+        try:
+            links.append(link['href'])
+        except KeyError:
+            print('problem with ', link)
+    # need to fix to search only for <a> tags with 'href' attribute
+    # or any tag with 'href' attribute?
+    return links
 
 def navigate():
     """Returns a list of all the links to notes/resources"""
