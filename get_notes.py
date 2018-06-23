@@ -2,6 +2,9 @@
 
 ## Libraries
 
+# Standard
+import os
+
 # Third party
 
 from selenium import webdriver # automatic browser
@@ -71,13 +74,22 @@ def all_links(soup):
 
 def navigate():
     """Returns a list of all the links to notes/resources"""
-    # Home page
-    modules_box = soup.select('.mymodules_list.mymodules')[0]
-    modules = modules_box.select("div[id^='course-']")
-    links = [module.select(".course_title a[href^='https://loop.dcu.ie']")[0]['href'] for module in modules]
-    # need find(), not select() (returns a list/all elements found)
+
+    ## Home page
+    # modules_box = soup.select('.mymodules_list.mymodules')[0]
+    # modules = modules_box.select("div[id^='course-']")
+    # links = [module.select(".course_title a[href^='https://loop.dcu.ie']")[0]['href'] for module in modules]
+
+    # OR
+
+    modules_box_tag = soup.select_one('div.mymodules_list.mymodules') # main box for where to search inside
+    modules_hyperlink_tags = modules_box_tag.select('a[href*="/course/"]')
+    modules_hyperlinks = [a_tag['href'] for a_tag in module_hyperlink_tags]
 
     # Inside every link
+
+    course_content_box_tag = soup.select_one('div.course-content')
+    course_hyperlinks = course_content_box_tag.select('a[href^="http"]')
 
     # Inside every link of link
 
@@ -86,6 +98,12 @@ def navigate():
     # go to all links and repeat recursively
     # stop when there's no longer any links
     # application to find all the links on a page?
+
+    # link-oriented approach:
+    # get a box tag with all the main content
+    # get all the links
+    # filter the links
+    # follow/do something with the links, based on the link's 'class' (resource, mod, course, etc)
 
 def save_notes(url, method='selenium', interactor):
     """Saves a piece of notes"""
@@ -142,6 +160,10 @@ def main():
     # requests solution here
 
     # get all pages and notes here
+
+
+def path_build(drive, *args):
+        return os.path.join(drive, os.sep, *args)
 
 if __name__ == '__main__':
     main()
