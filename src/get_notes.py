@@ -31,6 +31,11 @@ def all_links(soup):
     # or any tag with 'href' attribute?
     return links
 
+def save_site(url):
+    """Download a copy of a website with a url, 
+    following all the links 'internal' to the site and progressively saving all the pages"""
+    pass
+
 # Main
 
 def log_in(url, method='selenium'):
