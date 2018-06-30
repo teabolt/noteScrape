@@ -3,9 +3,10 @@ In one sweep download and save all your university or school notes
 
 OR
 
-A collection of scripts for web scraping specific educational resources
+A collection of scripts for scraping specific educational resources that are on the web
 
 ## Particular websites and notes to be scraped
+DCU = Dublin City University
 * DCU Moodle/Loop (loop.dcu.ie) -> select courses, pdf's
 * DCU CA117/CA116 programming websites (ca11X.computing.dcu.ie) -> programs submitted, tasks, site notes
 
