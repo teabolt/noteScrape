@@ -148,6 +148,26 @@ def filter_urls(urls, filt=None):
     # match by substring/containment
     # catch AttributeError's (supplied wrong attributes / dict keys)
 
+def filter_urls(function, urls, match):
+    # filter(function, iterable)
+    return (url for url in urls if function(urllib.parse.urlparse(url), match))
+
+def matcher(target, match, sameness='__eq__', quantifier=all):
+    """
+    sameness: '__eq__', '__ne__', '__contains__', '__gt__'...
+    quantifier: all, any, lambda x: len([e for e in x if e == False])==len(x), lambda x: False in x
+    """
+    a = []
+    for (t, m) in zip(target, match):
+        if getattr(t, sameness).__call__(m):
+            a.append(True)
+        else:
+            a.append(False)
+    return quantifier(a)
+
+def re_matcher(target, re_match):
+    pass
+
 
 def save(obj, soup=None):
     """Basic implementation, saves only the html text file.
