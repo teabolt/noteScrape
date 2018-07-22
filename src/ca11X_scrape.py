@@ -7,6 +7,7 @@
 # Standard
 import os # directory creation 
 import urllib.parse # manipulate URL's
+import re # match patterns
 
 # Third-party
 import requests # HTTP
@@ -22,12 +23,14 @@ def get_homepage(url, credentials):
     (in CA11X the credentials are a (username, password) tuple)
     A requests response is returned."""
     # To-do: security of credentials - not stored plainly in string variables??
+    print('Getting {}...'.format(url))
     return requests.get(url, auth=credentials)
 
 
 def process(homepage):
     """Retrieve/download the entire website, starting from its homepage (a requests object).
-    Side effect of saved notes (web pages)"""
+    Side effect of saved notes (web pages)
+    A 'link' is a more abstract concept here, both a URL and a relative or absolute path in HTML"""
     home_soup = bs4.BeautifulSoup(homepage, 'html.parser')
     save(homepage, home_soup)
 
@@ -53,6 +56,10 @@ def process(homepage):
         links_set.add(link) # add this link to the set of processed links (or use .update(iterable))
         # repeat with next most recent link
 
+def get_links(soup, **kwargs):
+    """Wrapper for a number of functions"""
+    links = get_links_bare(soup)
+    urls = get_urls(links, soup.res)
 
 def get_links_bare(soup, tags=False):
     """Return a list of all the links on a web page based on its source code that has been parsed.
@@ -100,57 +107,58 @@ def get_urls(links, base_url):
     # problem - when relative navigation is used ('../../'), URL's are built with missing parent directories
 
 
-def filter_urls(urls, filt=None):
-    """Filter a list of URL's based on 'filt'. A sub-list of 'urls' is returned.
-    'filt' is a dictionary mapping from attribute names (strings) of 'urllib.parse.ParseResult'
-    to values (strings) of those attributes.
-    The value may be a single string value or a list of string values of which each at least one must match.
-    The values are compared *strictly* (==)
-    eg: Use when only want to save hyperlinks 'internal' to the website:
-    include if the application type (http/s) and host name ('ca117.computing.dcu.ie') match,
-    filt = {'scheme':['http', 'https'], 'netloc':'ca117.computing.dcu.ie'}
-    """
+# def filter_urls(urls, filt=None):
+#     """Filter a list of URL's based on 'filt'. A sub-list of 'urls' is returned.
+#     'filt' is a dictionary mapping from attribute names (strings) of 'urllib.parse.ParseResult'
+#     to values (strings) of those attributes.
+#     The value may be a single string value or a list of string values of which each at least one must match.
+#     The values are compared *strictly* (==)
+#     eg: Use when only want to save hyperlinks 'internal' to the website:
+#     include if the application type (http/s) and host name ('ca117.computing.dcu.ie') match,
+#     filt = {'scheme':['http', 'https'], 'netloc':'ca117.computing.dcu.ie'}
+#     """
 
-    if filt == None:
-        return urls
+#     if filt == None:
+#         return urls
 
-    filtered_urls = []
-    for url in urls:
-        print(url)
-        parsed_url = urllib.parse.urlparse(url)
-        print(parsed_url)
-        for attr in filt.keys(): # go through each attribute (scheme, host, path, etc)
-            val = filt[attr] # the required value for this attribute
-            print(val)
-            # (using type checking to direct control flow - there might be better ways)
-            # NOT type(val) == type(str), RHS is type 'type'
-            if type(val) == str: # a single value was specified
-                print('here1')
-                print(getattr(parsed_url, attr))
-                if val == getattr(parsed_url, attr):
-                    filtered_urls.append(url)
-                else:
-                    break # 1 attribute doesn't match, skip this URL
-            elif type(val) == list: 
-                print('here2')
-                for v in val: # go through each value in the list of allowed values
-                    print(v, getattr(parsed_url, attr))
-                    if v == getattr(parsed_url, attr):
-                        filtered_urls.append(url)
-                    # TO-DO: break if none of the values match
-                        break # finished (only one required value needs to match)
-            else:
-                pass
-                print('here3')
-                # anything else in the filt dict is ignored
-    return filtered_urls
-    # TO-DO: list of attributes, pass integers as attributes, helpful messages for users
-    # match by substring/containment
-    # catch AttributeError's (supplied wrong attributes / dict keys)
+#     filtered_urls = []
+#     for url in urls:
+#         print(url)
+#         parsed_url = urllib.parse.urlparse(url)
+#         print(parsed_url)
+#         for attr in filt.keys(): # go through each attribute (scheme, host, path, etc)
+#             val = filt[attr] # the required value for this attribute
+#             print(val)
+#             # (using type checking to direct control flow - there might be better ways)
+#             # NOT type(val) == type(str), RHS is type 'type'
+#             if type(val) == str: # a single value was specified
+#                 print('here1')
+#                 print(getattr(parsed_url, attr))
+#                 if val == getattr(parsed_url, attr):
+#                     filtered_urls.append(url)
+#                 else:
+#                     break # 1 attribute doesn't match, skip this URL
+#             elif type(val) == list: 
+#                 print('here2')
+#                 for v in val: # go through each value in the list of allowed values
+#                     print(v, getattr(parsed_url, attr))
+#                     if v == getattr(parsed_url, attr):
+#                         filtered_urls.append(url)
+#                     # TO-DO: break if none of the values match
+#                         break # finished (only one required value needs to match)
+#             else:
+#                 pass
+#                 print('here3')
+#                 # anything else in the filt dict is ignored
+#     return filtered_urls
+#     # TO-DO: list of attributes, pass integers as attributes, helpful messages for users
+#     # match by substring/containment
+#     # catch AttributeError's (supplied wrong attributes / dict keys)
 
-def filter_urls(function, urls, match):
-    # filter(function, iterable)
-    return (url for url in urls if function(urllib.parse.urlparse(url), match))
+def filter_urls(function, urls, match, **kwargs):
+    """Filter a list of URL's using a filter function and """
+    # filter(function, iterable) -> a generator (not whole in memory)
+    return (url for url in urls if function(urllib.parse.urlparse(url), match, **kwargs))
 
 def matcher(target, match, sameness='__eq__', quantifier=all):
     """
@@ -159,14 +167,23 @@ def matcher(target, match, sameness='__eq__', quantifier=all):
     """
     a = []
     for (t, m) in zip(target, match):
-        if getattr(t, sameness).__call__(m):
-            a.append(True)
-        else:
-            a.append(False)
+        try:
+            if getattr(m, sameness).__call__(t):
+                    a.append(True)
+            else:
+                a.append(False)
+        except TypeError:
+            try:
+                if getattr(m, sameness).__call__(t, m):
+                    a.append(True)
+                else:
+                    a.append(False)
+            except TypeError:
+                print('Could not pass the required number of arguments to the {} method of the supplied type {}'.format(sameness, type(t)))
     return quantifier(a)
 
 def re_matcher(target, re_match):
-    pass
+    return bool(re.fullmatch(re_match, target))
 
 
 def save(obj, soup=None):
@@ -186,8 +203,14 @@ def save(obj, soup=None):
 
 def main():
     res = get_homepage(top_url_ca117, (input('name: '), input('pw: ')))
+    print('Got {} object, url {}, raising {}, and status code {}'.format(res, res.url, res.raise_for_status(), res.status_code))
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
-    links = get_links(soup, base_url=top_url_ca117)
+    print('Got {} object \n with text: {} \n with tags: {}'.format(type(soup), soup.text[:250], soup.contents[:5]))
+    links = get_links_bare(soup)
+    print('Got {} links: {}...'.format(len(links), links[:5]))
+    urls = get_urls(links, base_url=res.url)
+    print('Got {} urls: {}...'.format(len(urls), urls[:5]))
+    urls_internal = filter_urls(matcher, urls, ('http', '', '', '', '', ''), sameness='__contains__', quantifier=all)
     return soup, links
 
 if __name__ == '__main__':
