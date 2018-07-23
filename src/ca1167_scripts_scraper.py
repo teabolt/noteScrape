@@ -13,6 +13,7 @@ import urllib.parse # manipulation and analysis of URL's
 import datetime # dates and times
 #import time # timestamps
 import sys # system arguments
+import getpass # get password input from the terminal
 
 # Third-party
 
@@ -44,7 +45,7 @@ ca116_globals = {
 
 default_env_globals = {
     'driver_path':r'D:/Development/noteScrape/tools/geckodriver',
-    'save_dir_path':r'D:/Development/noteScrape/output/scripts/',
+    'save_dir_path':r'D:/Development/noteScrape/output/scripts/tmp/',
 }
 
 
@@ -131,9 +132,15 @@ def selenium_scrape(dashboard_url, base_url, driver_path, save_dir_path):
     # *access* alert object immediatelly? Not as an expected condition happening but as an element?
     # <class 'selenium.webdriver.common.alert.Alert'>
     alert = WebDriverWait(browser, 5).until(EC.alert_is_present()) # what should be the wait time?
-    alert.send_keys(input('Username: ')+Keys.TAB+input('Password: ')) # (no spaces, concatinate)
+    alert.send_keys(input('Username: ')+Keys.TAB+getpass.getpass()) # (no spaces, concatinate)
     alert.accept()
-    # security needed with inputting and saving locally of credentials
+    # security needed with inputting and saving locally of credentials - getpass.getpass()
+    # the solution is still not secure as the password string may be retrieved from memory
+    # See:
+    # https://stackoverflow.com/questions/728164/securely-erasing-password-in-memory-python
+    # https://security.stackexchange.com/questions/29350/swap-file-may-contain-sensitive-data
+    # https://security.stackexchange.com/questions/51428/how-secure-is-a-python-pyro-daemon-for-storing-a-password
+    # https://www.reddit.com/r/learnpython/comments/4n5m8p/storing_passwords_in_scripts/
 
     # replace beautifulsoup parsing with selenium parsing
     # also include waits - contents are probably gotten from server - wait a bit, else get a NoneType object
@@ -217,6 +224,8 @@ def get_task(browser, task_url, path_out):
 
 # sometimes it takes some time to get a page (loading icon keeps on spinning), so perhaps some timeout-wait-retry mechanism is needed to make things more rigorous (else can just time out in the middle of things)
 
+# one time got an 'OSError: [WinError 6] The handle is invalid', from ignoring expection in 'Popen.__del__' function
+
 
 def main():
     """Takes three command-line arguments
@@ -224,9 +233,14 @@ def main():
     'driver_path' is the path (with forward slashes '/') of the geckodriver.exe program for selenium, with '/geckodriver' at its end
     'save_dir_path' is the path (with forward slashes '/') of the directory where the notes should be saved, starting with a drive path 'X:/' (for Windows) and ending with a forward slash '/'"""
     args = sys.argv[1:]
-    assert len(args) == 3
+    assert len(args) == 1
     which = args[0]
-    env = {'driver_path':args[1], 'save_dir_path':args[2]}
+
+    assert len(args) == 1 or len(args) == 3
+    if len(args) == 3:
+        env = {'driver_path':args[1], 'save_dir_path':args[2]}
+    elif len(args) == 1:
+        env = default_env_globals
 
     if which == 'ca117':
         selenium_scrape(**ca117_globals, **env)
