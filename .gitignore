@@ -1,2 +1,3 @@
-# ignore python optimisation files
-__pycache__/
+# IGNORE
+__pycache__/ # python optimisation/compiled files
+.idea/ # IDE program files
