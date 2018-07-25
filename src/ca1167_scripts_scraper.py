@@ -224,16 +224,18 @@ def get_task(browser, task_url, path_out):
 
 # sometimes it takes some time to get a page (loading icon keeps on spinning), so perhaps some timeout-wait-retry mechanism is needed to make things more rigorous (else can just time out in the middle of things)
 
-# one time got an 'OSError: [WinError 6] The handle is invalid', from ignoring expection in 'Popen.__del__' function
+# Known issue: Program crashes with 'OSError: [WinError 6] The handle is invalid', from ignoring exception in 'Popen.__del__' function
+# Usually happens when running the program for the first time in a 'session'.
+# For now just restart the program for a second run and it should work.
 
 
 def main():
     """Takes three command-line arguments
     'which' is either 'ca117' or 'ca116' (two different modules)
     'driver_path' is the path (with forward slashes '/') of the geckodriver.exe program for selenium, with '/geckodriver' at its end
-    'save_dir_path' is the path (with forward slashes '/') of the directory where the notes should be saved, starting with a drive path 'X:/' (for Windows) and ending with a forward slash '/'"""
+    'save_dir_path' is the path (with forward slashes '/') of the directory where the notes should be saved, starting with a drive path 'X:/' (for Windows) and ending with a forward slash '/'
+	Relative path notation can be used with '.' and '..'"""
     args = sys.argv[1:]
-    assert len(args) == 1
     which = args[0]
 
     assert len(args) == 1 or len(args) == 3
