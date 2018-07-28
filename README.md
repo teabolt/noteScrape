@@ -2,12 +2,17 @@
 
 A collection of programs/scripts for scraping/retrieving specific educational (school/university) resources (notes, files, etc) that are on the web (a web scraping application).
 
-The following particular tools are used:
+**The following are used and required**
 * Python 3.7
-* Python web scraping libraries (selenium, requests, beautifulsoup)
+   * https://www.python.org/
+* Python web scraping libraries (selenium, beautifulsoup, requests)
+   * ```pip install selenium```
+   * ```pip install beautifulsoup4```
+   * ```pip install requests```
 * Firefox web driver
+   * https://github.com/mozilla/geckodriver/releases
 
-The programs are written on a Windows platform so they may not be portable
+The programs are written on a Windows platform so they may not work on other operating systems
 
 
 ## List of scripts, usage
@@ -31,7 +36,7 @@ py -3.7 ca1167_scripts_scraper.py ca117 ./../tools/geckodriver ./../output/scrip
 
 The program takes a number of arguments:
 1. 'ca117' or 'ca116' (which module)
-2.  The path of the web browser driver (https://github.com/mozilla/geckodriver/releases or use the supplied driver in tools/)
+2. The path of the web browser driver (own or use the supplied driver in tools/)
 3. The path of the directory under which all the scripts should be saved
 
 
