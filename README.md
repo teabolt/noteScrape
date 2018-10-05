@@ -23,9 +23,17 @@ DCU = Dublin City University
 ### ca1167_scripts_scraper.py 
 DCU CA117/CA116 computer programming module student scripts/code (user-submitted to an online checker) retriever
 
+#### Video (click on image to view)
 
-#### Usage example, docs
+<a href="https://youtu.be/5bRzrB92JoY"
+ target="_blank"><img src="http://img.youtube.com/vi/5bRzrB92JoY/0.jpg" 
+alt="Image in the middle of the video - showing the browser and the command-line" width="240" height="180" border="10" /></a>
 
+_TO-DO_ Edit the video
+
+#### Usage
+
+##### Before
 cmd.exe:
 ```
 cd <project-directory>
@@ -33,6 +41,7 @@ cd src
 py -3.7 ca1167_scripts_scraper.py ca117 ./../tools/geckodriver ./../output/scripts/ca117/
 ```
 
+##### Run
 
 The program takes a number of arguments:
 1. 'ca117' or 'ca116' (which module)
